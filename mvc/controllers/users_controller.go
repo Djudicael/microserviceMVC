@@ -1,41 +1,38 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/Djudicael/microserviceMVC/mvc/services"
 	"github.com/Djudicael/microserviceMVC/mvc/utils"
+	"github.com/gin-gonic/gin"
 )
 
-func GetUser(resp http.ResponseWriter, req *http.Request) {
-	userIdParam := req.URL.Query().Get("user_id")
-	//log.Printf("About to process user_id %v", userId)
-	userId, err := (strconv.ParseInt(userIdParam, 10, 64))
+func GetUser(c *gin.Context) {
+
+	userId, err := (strconv.ParseInt(c.Param("user_id"), 10, 64))
 
 	if err != nil {
 		// Just return the bad resquest to the client
-		apiErr := &utils.ApplicationError{Message: "user_id must be a number",
+		apiErr := &utils.ApplicationError{
+			Message:    "user_id must be a number",
 			StatusCode: http.StatusBadRequest,
 			Code:       "bad_request",
 		}
-		jsonValue, _ := json.Marshal(apiErr)
-		resp.WriteHeader(apiErr.StatusCode)
-		resp.Write(jsonValue)
+		utils.RespondError(c, apiErr)
+		//c.JSON(apiErr.StatusCode, apiErr)
 		return
 	}
 
-	user, apiErr := services.GetUser(userId)
+	user, apiErr := services.UserService.GetUser(userId)
 	if apiErr != nil {
-		//handle the err and return to the client
-		jsonValue, _ := json.Marshal(apiErr)
-		resp.WriteHeader(apiErr.StatusCode)
-		resp.Write(jsonValue)
+		// c.JSON(apiErr.StatusCode, apiErr)
+		utils.RespondError(c, apiErr)
 		return
 	}
 
 	//return user to client
-	jsonValue, _ := json.Marshal(user)
-	resp.Write(jsonValue)
+	// c.JSON(http.StatusOK, user)
+	utils.Respond(c, http.StatusOK, user)
 }
