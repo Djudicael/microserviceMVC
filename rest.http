@@ -1,1 +1,10 @@
 GET  http://localhost:8080/users/123
+
+####
+POST  http://localhost:8080/repositories
+Content-Type: application/json
+
+{
+    "name": "golang-example",
+    "description" :"this is the description"
+}
